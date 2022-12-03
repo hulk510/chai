@@ -4,7 +4,9 @@ import { Configuration, OpenAIApi } from 'openai';
 
 dotenv.config();
 
-const client = new Discord.Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Discord.Client({
+  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
+});
 
 client.login(process.env.DISCORD_BOT_TOKEN);
 
