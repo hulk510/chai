@@ -2,7 +2,7 @@
   "name": "chatgpt-discord",
   "version": "0.1.0",
   "description": "chat gptをdiscordで使う",
-  "main": "index.js",
+  "main": "lib/main.js",
   "dependencies": {
     "discord.js": "^14.7.1",
     "openai": "^3.1.0"
