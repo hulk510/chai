@@ -5,11 +5,14 @@ import { Configuration, OpenAIApi } from 'openai';
 dotenv.config();
 
 const client = new Discord.Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+  ],
 });
 
 client.login(process.env.DISCORD_BOT_TOKEN);
-
 client.on('ready', () => {
   console.log('Ready...');
 });
@@ -30,3 +33,8 @@ const openai = new OpenAIApi(configuration);
 //   ).data.choices[0].text;
 //   console.log(response);
 // })();
+client.on('messageCreate', async (message) => {
+  if (message.author.bot) return;
+  console.log(message.content);
+  message.channel.send('hello');
+});
