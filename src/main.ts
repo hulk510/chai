@@ -22,19 +22,25 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
-// (async () => {
-//   const response = (
-//     await openai.createCompletion({
-//       model: 'text-davinci-003',
-//       prompt: 'やっほーこんにちは、今日の運勢を教えてください',
-//       temperature: 0,
-//       max_tokens: 512,
-//     })
-//   ).data.choices[0].text;
-//   console.log(response);
-// })();
 client.on('messageCreate', async (message) => {
   if (message.author.bot) return;
-  console.log(message.content);
-  message.channel.send('hello');
+  if (message.channelId !== 'some channelid') {
+    return;
+  }
+  message.channel.send('...');
+  console.log(message.channelId);
+  const response = (
+    await openai.createCompletion({
+      model: 'text-davinci-003',
+      prompt: message.content,
+      temperature: 0,
+      max_tokens: 300,
+    })
+  ).data.choices[0].text;
+  if (!response) {
+    message.channel.send('返信を返せません');
+    return;
+  }
+  console.log(response);
+  message.channel.send(response);
 });
