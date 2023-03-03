@@ -5,7 +5,7 @@
   "main": "lib/main.js",
   "dependencies": {
     "discord.js": "^14.7.1",
-    "openai": "^3.1.0"
+    "openai": "^3.2.1"
   },
   "devDependencies": {
     "@types/node": "^18.11.10",
