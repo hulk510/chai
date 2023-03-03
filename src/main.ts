@@ -1,6 +1,6 @@
 import Discord, { GatewayIntentBits } from 'discord.js';
 import dotenv from 'dotenv';
-import { Configuration, OpenAIApi } from 'openai';
+import { getMessage } from './openai';
 
 dotenv.config();
 
@@ -17,30 +17,15 @@ client.on('ready', () => {
   console.log('Ready...');
 });
 
-const configuration = new Configuration({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-const openai = new OpenAIApi(configuration);
-
 client.on('messageCreate', async (message) => {
   if (message.author.bot) return;
-  if (message.channelId !== 'some channelid') {
+  if (message.channelId !== '889435057331241000') {
     return;
   }
-  message.channel.send('...');
-  console.log(message.channelId);
-  const response = (
-    await openai.createCompletion({
-      model: 'text-davinci-003',
-      prompt: message.content,
-      temperature: 0,
-      max_tokens: 300,
-    })
-  ).data.choices[0].text;
+  const response = await getMessage(message.content);
   if (!response) {
     message.channel.send('返信を返せません');
     return;
   }
-  console.log(response);
   message.channel.send(response);
 });
