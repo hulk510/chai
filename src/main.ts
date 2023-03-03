@@ -1,5 +1,6 @@
 import Discord, { Events, GatewayIntentBits } from 'discord.js';
 import dotenv from 'dotenv';
+import { getMessage } from './openai';
 
 dotenv.config();
 
@@ -19,25 +20,26 @@ client.on('ready', () => {
 client.on(Events.MessageCreate, async (message) => {
   console.log(message);
   if (message.author.bot) return;
-  if (message.channelId !== '889435057331241000') {
+  if (message.channelId !== '1081105541545328730') {
     return;
   }
 
   // message.channel.isThread();
 
-  const thread = await message.startThread({
-    name: message.content,
-    autoArchiveDuration: 60,
-    reason: 'Needed a separate thread for food',
-  });
-  console.log(`Created thread: ${thread.name}`);
-  console.log(`Thread ID: ${thread.id}`);
-  // const response = await getMessage(message.content);
-  // if (!response) {
-  //   message.channel.send('返信を返せません');
-  //   return;
-  // }
-  // message.channel.send(response);
+  // const thread = await message.startThread({
+  //   name: message.content,
+  //   autoArchiveDuration: 60,
+  //   reason: 'Needed a separate thread for food',
+  // });
+  // console.log(`Created thread: ${thread.name}`);
+  // console.log(`Thread ID: ${thread.id}`);
+  try {
+    const response = await getMessage(message.content);
+    message.channel.send(response);
+  } catch (error) {
+    console.error(error);
+    message.channel.send('返信を返せません');
+  }
 });
 
 // client.on(Events.)
