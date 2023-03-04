@@ -1,14 +1,24 @@
-import { OpenAI } from 'langchain';
+import { ConversationChain } from 'langchain/chains';
+import { OpenAIChat } from 'langchain/llms';
+import { BufferMemory } from 'langchain/memory';
 import { Configuration, OpenAIApi } from 'openai';
 
+const memory = new BufferMemory();
 export const getLCMessage = async (message: string) => {
-  const model = new OpenAI({
+  const model = new OpenAIChat({
+    modelName: 'gpt-3.5-turbo',
     openAIApiKey: process.env.OPENAI_API_KEY,
     temperature: 0.9,
+    prefixMessages: [
+      { role: 'user', content: '私の名前はジョンです' },
+      { role: 'assistant', content: 'こんにちは' },
+    ],
   });
-  const res = await model.call(message);
+
+  const chain = new ConversationChain({ llm: model, memory: memory });
+  const res = await chain.call({ input: message });
   console.log(res);
-  return res;
+  return res.response;
 };
 
 export const getMessage = async (message: string) => {
