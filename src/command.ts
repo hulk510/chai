@@ -10,6 +10,7 @@ const commands = [
   new SlashCommandBuilder()
     .setName('user')
     .setDescription('Replies with user info!'),
+  new SlashCommandBuilder().setName('new').setDescription('new thread'),
 ].map((command) => command.toJSON());
 
 export const initCommands = async () => {

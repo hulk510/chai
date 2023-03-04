@@ -1,4 +1,11 @@
-import Discord, { Events, GatewayIntentBits } from 'discord.js';
+import Discord, {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  ComponentType,
+  Events,
+  GatewayIntentBits,
+} from 'discord.js';
 import dotenv from 'dotenv';
 import { initCommands } from './command.js';
 import { getLCMessage } from './openai.js';
@@ -21,6 +28,14 @@ client.on('ready', () => {
 });
 
 client.on(Events.MessageCreate, async (message) => {
+  // if (message.interaction?.commandName === 'ping') {
+  //   message.startThread({
+  //     name: message.content,
+  //     autoArchiveDuration: 60,
+  //     reason: 'Needed a separate thread for food',
+  //   });
+  // }
+  // console.log(message);
   if (message.author.bot) return;
   // ここでチャンネルIDを動的に取得したい
   // ここで返信するチャンネルをthread_logから取得して含まれてたら返信するようにする
@@ -52,18 +67,39 @@ client.on(Events.MessageCreate, async (message) => {
 
 client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isCommand()) return;
-  console.log(interaction); // channelidとかは取れる
+  // console.log(interaction); // channelidとかは取れる
   const { commandName } = interaction;
 
   switch (commandName) {
     case 'ping':
-      await interaction.reply('Pong!');
+      const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
+        new ButtonBuilder()
+          .setCustomId('primary')
+          .setLabel('Click me!')
+          .setStyle(ButtonStyle.Primary)
+      );
+      await interaction.reply({
+        content: 'I think you should,',
+        components: [row],
+      });
+      await interaction.channel
+        ?.awaitMessageComponent({ componentType: ComponentType.Button })
+        .then((interaction) => {
+          interaction.message.startThread({
+            name: interaction.message.content,
+            autoArchiveDuration: 60,
+            reason: 'Needed a separate thread for food',
+          });
+          console.log(interaction);
+        });
       break;
     case 'server':
       await interaction.reply('Server info.');
       break;
     case 'user':
       await interaction.reply('User info.');
+      break;
+    case 'new':
       break;
     default:
       break;
