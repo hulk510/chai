@@ -1,8 +1,11 @@
 import Discord, { Events, GatewayIntentBits } from 'discord.js';
 import dotenv from 'dotenv';
+import { initCommands } from './command.js';
 import { getLCMessage } from './openai.js';
 
 dotenv.config();
+
+initCommands();
 
 const client = new Discord.Client({
   intents: [
@@ -20,6 +23,7 @@ client.on('ready', () => {
 client.on(Events.MessageCreate, async (message) => {
   if (message.author.bot) return;
   // ここでチャンネルIDを動的に取得したい
+  // ここで返信するチャンネルをthread_logから取得して含まれてたら返信するようにする
   if (message.channelId !== '1081105541545328730') {
     return;
   }
