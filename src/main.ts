@@ -49,3 +49,23 @@ client.on(Events.MessageCreate, async (message) => {
     });
   }
 });
+
+client.on(Events.InteractionCreate, async (interaction) => {
+  if (!interaction.isCommand()) return;
+  console.log(interaction); // channelidとかは取れる
+  const { commandName } = interaction;
+
+  switch (commandName) {
+    case 'ping':
+      await interaction.reply('Pong!');
+      break;
+    case 'server':
+      await interaction.reply('Server info.');
+      break;
+    case 'user':
+      await interaction.reply('User info.');
+      break;
+    default:
+      break;
+  }
+});
