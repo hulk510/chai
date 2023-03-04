@@ -1,4 +1,15 @@
+import { OpenAI } from 'langchain';
 import { Configuration, OpenAIApi } from 'openai';
+
+export const getLCMessage = async (message: string) => {
+  const model = new OpenAI({
+    openAIApiKey: process.env.OPENAI_API_KEY,
+    temperature: 0.9,
+  });
+  const res = await model.call(message);
+  console.log(res);
+  return res;
+};
 
 export const getMessage = async (message: string) => {
   const configuration = new Configuration({

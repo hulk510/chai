@@ -1,6 +1,6 @@
 import Discord, { Events, GatewayIntentBits } from 'discord.js';
 import dotenv from 'dotenv';
-import { getMessage } from './openai';
+import { getLCMessage } from './openai.js';
 
 dotenv.config();
 
@@ -33,7 +33,7 @@ client.on(Events.MessageCreate, async (message) => {
     });
   }, 1000);
   try {
-    const response = await getMessage(message.content);
+    const response = await getLCMessage(message.content);
     message.channel.send(response);
   } catch (error) {
     console.error(error);
