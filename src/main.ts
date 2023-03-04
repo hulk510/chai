@@ -1,4 +1,4 @@
-import Discord, { GatewayIntentBits } from 'discord.js';
+import Discord, { Events, GatewayIntentBits } from 'discord.js';
 import dotenv from 'dotenv';
 import { getMessage } from './openai';
 
@@ -17,15 +17,31 @@ client.on('ready', () => {
   console.log('Ready...');
 });
 
-client.on('messageCreate', async (message) => {
+client.on(Events.MessageCreate, async (message) => {
   if (message.author.bot) return;
-  if (message.channelId !== '889435057331241000') {
+  // ここでチャンネルIDを動的に取得したい
+  if (message.channelId !== '1081105541545328730') {
     return;
   }
-  const response = await getMessage(message.content);
-  if (!response) {
+
+  let dots = '🤔 .';
+  let msg = message.channel.send(dots);
+  let interval = setInterval(() => {
+    dots += ' .';
+    msg.then((m) => {
+      m.edit(dots);
+    });
+  }, 1000);
+  try {
+    const response = await getMessage(message.content);
+    message.channel.send(response);
+  } catch (error) {
+    console.error(error);
     message.channel.send('返信を返せません');
-    return;
+  } finally {
+    clearInterval(interval);
+    msg.then((m) => {
+      m.delete();
+    });
   }
-  message.channel.send(response);
 });
