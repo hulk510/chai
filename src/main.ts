@@ -65,15 +65,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
     case 'ping':
       await interaction.reply('Pong!');
       break;
-    case 'server':
-      break;
-    case 'user':
-      const message = await interaction.reply({
-        content: 'You can react with Unicode emojis!',
-        fetchReply: true,
-      });
-      message.react('😄');
-      break;
     case 'talk':
       if (interaction.channel?.isThread()) {
         interaction.reply({

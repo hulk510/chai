@@ -5,12 +5,6 @@ const commands = [
     .setName('ping')
     .setDescription('Replies with pong!'),
   new SlashCommandBuilder()
-    .setName('server')
-    .setDescription('Replies with server info!'),
-  new SlashCommandBuilder()
-    .setName('user')
-    .setDescription('Replies with user info!'),
-  new SlashCommandBuilder()
     .setName('talk')
     .setDescription('ChatGPTとスレッドで話す'),
 ].map((command) => command.toJSON());
