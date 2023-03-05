@@ -68,66 +68,62 @@ client.on(Events.InteractionCreate, async (interaction) => {
       message.react('😄');
       break;
     case 'talk':
-      if (!interaction.channel?.isThread()) {
-        const filter = (message: Discord.Message) => {
-          return message.author.id === interaction.user.id;
-        };
-        interaction
-          .reply({
-            content: 'スレッド名を入力してください',
-            fetchReply: true,
-            ephemeral: true,
-          })
-          .then(() => {
-            interaction.channel
-              ?.awaitMessages({ filter, max: 1, time: 10000, errors: ['time'] })
-              .then((collected) => {
-                const message = collected.first();
-                if (message) {
-                  message
-                    .startThread({
-                      name: message.content,
-                      autoArchiveDuration: 60,
-                    })
-                    .then((thread) => {
-                      try {
-                        writeThreadLog(thread.id, message.author.id);
-                        thread.send({
-                          content: `${message.author}`,
-                        });
-                      } catch (error) {
-                        console.error(error);
-                        thread.delete();
-                        interaction.followUp({
-                          content: 'スレッドを作成できませんでした',
-                          ephemeral: true,
-                        });
-                      }
-                    })
-                    .catch((error) => {
-                      console.error(error);
-                      interaction.followUp({
-                        content: 'スレッドを作成できませんでした',
-                        ephemeral: true,
-                      });
-                    });
-                }
-              })
-              .catch((collected) => {
-                interaction.followUp({
-                  content: '時間切れです。もう一度やり直してください',
-                  ephemeral: true,
-                });
-              });
-          });
-      } else {
+      if (interaction.channel?.isThread()) {
         interaction.reply({
           content: 'ここでは使えません',
           ephemeral: true,
         });
       }
+      interaction
+        .reply({
+          content: 'スレッド名を入力してください',
+          fetchReply: true,
+          ephemeral: true,
+        })
+        .then(() => {
+          const filter = (message: Discord.Message) => {
+            return message.author.id === interaction.user.id;
+          };
+          interaction.channel
+            ?.awaitMessages({ filter, max: 1, time: 10000, errors: ['time'] })
+            .then(async (collected) => {
+              const message = collected.first();
+              if (!message) {
+                return;
+              }
+              let thread: Discord.AnyThreadChannel | null = null;
+              try {
+                thread = await threadCreate(message);
+              } catch (error) {
+                console.error(error);
+                thread?.delete();
+                interaction.followUp({
+                  content: 'スレッドを作成できませんでした',
+                  ephemeral: true,
+                });
+              }
+            })
+            .catch((collected) => {
+              interaction.followUp({
+                content: '時間切れです。もう一度やり直してください',
+                ephemeral: true,
+              });
+            });
+        });
       break;
     default:
       break;
   }
 });
+
+const threadCreate = async (message: Discord.Message) => {
+  const thread = await message.startThread({
+    name: message.content,
+    autoArchiveDuration: 60,
+  });
+  writeThreadLog(thread.id, message.author.id);
+  thread.send({
+    content: `${message.author}`,
+  });
+  return thread;
+};
