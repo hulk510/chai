@@ -3,8 +3,14 @@ import { OpenAIChat } from 'langchain/llms';
 import { BufferWindowMemory } from 'langchain/memory';
 import { Configuration, OpenAIApi } from 'openai';
 
-const memory = new BufferWindowMemory();
-export const getLCMessage = async (message: string) => {
+interface Memories {
+  [key: string]: BufferWindowMemory;
+}
+export const memories: Memories = {};
+export const getLCMessage = async (
+  message: string,
+  memory: BufferWindowMemory
+) => {
   const model = new OpenAIChat({
     modelName: 'gpt-3.5-turbo',
     openAIApiKey: process.env.OPENAI_API_KEY,
@@ -16,7 +22,6 @@ export const getLCMessage = async (message: string) => {
     memory: memory,
   });
   const res = await chain.call({ input: message });
-  console.log(res);
   return res.response;
 };
 

@@ -1,8 +1,9 @@
 import console from 'console';
 import Discord, { Events, GatewayIntentBits } from 'discord.js';
 import dotenv from 'dotenv';
+import { BufferWindowMemory } from 'langchain/memory';
 import { initCommands } from './command.js';
-import { getLCMessage } from './openai.js';
+import { getLCMessage, memories } from './openai.js';
 import { isGPTThread, writeThreadLog } from './thread.js';
 
 dotenv.config();
@@ -24,8 +25,14 @@ client.on('ready', () => {
 
 client.on(Events.MessageCreate, async (message) => {
   if (message.author.bot) return;
-  if (!isGPTThread(message.channel.id)) {
+  const channelId = message.channel.id;
+  if (!isGPTThread(channelId)) {
     return;
+  }
+  // メモリ（memories）にスレッドのIDがなければ作成、あればそれを使う
+  const memory = memories[channelId];
+  if (!memory) {
+    memories[channelId] = new BufferWindowMemory();
   }
 
   let dots = '🤔 .';
@@ -37,7 +44,7 @@ client.on(Events.MessageCreate, async (message) => {
     });
   }, 1000);
   try {
-    const response = await getLCMessage(message.content);
+    const response = await getLCMessage(message.content, memory);
     message.channel.send(response);
   } catch (error) {
     console.error(error);
