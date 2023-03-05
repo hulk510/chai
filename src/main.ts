@@ -1,11 +1,5 @@
-import Discord, {
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  ComponentType,
-  Events,
-  GatewayIntentBits,
-} from 'discord.js';
+import console from 'console';
+import Discord, { Events, GatewayIntentBits } from 'discord.js';
 import dotenv from 'dotenv';
 import { initCommands } from './command.js';
 import { getLCMessage } from './openai.js';
@@ -28,14 +22,6 @@ client.on('ready', () => {
 });
 
 client.on(Events.MessageCreate, async (message) => {
-  // if (message.interaction?.commandName === 'ping') {
-  //   message.startThread({
-  //     name: message.content,
-  //     autoArchiveDuration: 60,
-  //     reason: 'Needed a separate thread for food',
-  //   });
-  // }
-  // console.log(message);
   if (message.author.bot) return;
   // ここでチャンネルIDを動的に取得したい
   // ここで返信するチャンネルをthread_logから取得して含まれてたら返信するようにする
@@ -66,40 +52,71 @@ client.on(Events.MessageCreate, async (message) => {
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
-  if (!interaction.isCommand()) return;
-  // console.log(interaction); // channelidとかは取れる
+  if (!interaction.isChatInputCommand()) return;
   const { commandName } = interaction;
 
   switch (commandName) {
     case 'ping':
-      const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-        new ButtonBuilder()
-          .setCustomId('primary')
-          .setLabel('Click me!')
-          .setStyle(ButtonStyle.Primary)
-      );
-      await interaction.reply({
-        content: 'I think you should,',
-        components: [row],
-      });
-      await interaction.channel
-        ?.awaitMessageComponent({ componentType: ComponentType.Button })
-        .then((interaction) => {
-          interaction.message.startThread({
-            name: interaction.message.content,
-            autoArchiveDuration: 60,
-            reason: 'Needed a separate thread for food',
-          });
-          console.log(interaction);
-        });
+      await interaction.reply('Pong!');
       break;
     case 'server':
-      await interaction.reply('Server info.');
       break;
     case 'user':
-      await interaction.reply('User info.');
+      const message = await interaction.reply({
+        content: 'You can react with Unicode emojis!',
+        fetchReply: true,
+      });
+      message.react('😄');
       break;
-    case 'new':
+    case 'talk':
+      if (!interaction.channel?.isThread()) {
+        const filter = (message: Discord.Message) => {
+          return message.author.id === interaction.user.id;
+        };
+        interaction
+          .reply({
+            content: 'スレッド名を入力してください',
+            fetchReply: true,
+            ephemeral: true,
+          })
+          .then(() => {
+            interaction.channel
+              ?.awaitMessages({ filter, max: 1, time: 10000, errors: ['time'] })
+              .then((collected) => {
+                const message = collected.first();
+                if (message) {
+                  message
+                    .startThread({
+                      name: message.content,
+                      autoArchiveDuration: 60,
+                    })
+                    .then((thread) => {
+                      thread.send({
+                        content: `${message.author}`,
+                      });
+                    })
+                    .catch((error) => {
+                      console.error(error);
+                      interaction.followUp({
+                        content: 'スレッドを作成できませんでした',
+                        ephemeral: true,
+                      });
+                    });
+                }
+              })
+              .catch((collected) => {
+                interaction.followUp({
+                  content: '時間切れです。もう一度やり直してください',
+                  ephemeral: true,
+                });
+              });
+          });
+      } else {
+        interaction.reply({
+          content: 'ここでは使えません',
+          ephemeral: true,
+        });
+      }
       break;
     default:
       break;
