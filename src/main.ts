@@ -3,6 +3,7 @@ import Discord, { Events, GatewayIntentBits } from 'discord.js';
 import dotenv from 'dotenv';
 import { initCommands } from './command.js';
 import { getLCMessage } from './openai.js';
+import { isGPTThread, writeThreadLog } from './thread.js';
 
 dotenv.config();
 
@@ -23,9 +24,7 @@ client.on('ready', () => {
 
 client.on(Events.MessageCreate, async (message) => {
   if (message.author.bot) return;
-  // ここでチャンネルIDを動的に取得したい
-  // ここで返信するチャンネルをthread_logから取得して含まれてたら返信するようにする
-  if (message.channelId !== '1081105541545328730') {
+  if (!isGPTThread(message.channel.id)) {
     return;
   }
 
@@ -91,9 +90,19 @@ client.on(Events.InteractionCreate, async (interaction) => {
                       autoArchiveDuration: 60,
                     })
                     .then((thread) => {
-                      thread.send({
-                        content: `${message.author}`,
-                      });
+                      try {
+                        writeThreadLog(thread.id, message.author.id);
+                        thread.send({
+                          content: `${message.author}`,
+                        });
+                      } catch (error) {
+                        console.error(error);
+                        thread.delete();
+                        interaction.followUp({
+                          content: 'スレッドを作成できませんでした',
+                          ephemeral: true,
+                        });
+                      }
                     })
                     .catch((error) => {
                       console.error(error);
