@@ -3,7 +3,7 @@ import Discord, { Events, GatewayIntentBits } from 'discord.js';
 import dotenv from 'dotenv';
 import { BufferWindowMemory } from 'langchain/memory';
 import { initCommands } from './command.js';
-import { getLCMessage, memories } from './openai.js';
+import { getAgentMessage, memories } from './openai.js';
 import { isGPTThread, writeThreadLog } from './thread.js';
 
 dotenv.config();
@@ -44,7 +44,8 @@ client.on(Events.MessageCreate, async (message) => {
     });
   }, 1000);
   try {
-    const response = await getLCMessage(message.content, memory);
+    // const response = await getLCMessage(message.content, memory);
+    const response = await getAgentMessage(message.content);
     message.channel.send(response);
   } catch (error) {
     console.error(error);
